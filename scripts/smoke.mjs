@@ -1,0 +1,18 @@
+import { chromium } from "@playwright/test";
+import path from "node:path";
+const file = "file://" + path.resolve("dist-single/index.html");
+const browser = await chromium.launch();
+const ctx = await browser.newContext({ viewport: { width: 412, height: 915 }, deviceScaleFactor: 2, isMobile: true, hasTouch: true });
+const page = await ctx.newPage();
+const errors = [];
+page.on("pageerror", e => errors.push("pageerror: " + e.message));
+page.on("console", m => { if (m.type() === "error" || m.type() === "warning") errors.push(m.type() + ": " + m.text()); });
+await page.goto(file);
+await page.waitForSelector(".lock-card", { timeout: 10000 });
+await page.screenshot({ path: "shots/01-setup.png" });
+await page.getByRole("button", { name: "Suggest a passphrase" }).click();
+await page.getByRole("button", { name: "Create vault" }).click();
+await page.waitForSelector(".nav", { timeout: 20000 });
+await page.screenshot({ path: "shots/02-empty.png" });
+console.log("errors:", JSON.stringify(errors, null, 1));
+await browser.close();
