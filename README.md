@@ -93,3 +93,4 @@ For a one-page tour (stack, architecture, build phases, tests), open
 | `app/` | Source code (React + TypeScript) and tests. |
 | `DOCS.md` | Developer notes. |
 | `docs/overview.html` | One-page project overview. |
+| `docs/overview.pdf` | The same overview as a PDF. |
