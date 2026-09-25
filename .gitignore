@@ -6,4 +6,3 @@ playwright-report/
 shots/
 .vite/
 __pycache__/
-*.log
