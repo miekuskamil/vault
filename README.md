@@ -5,9 +5,9 @@ Nothing is ever sent over the network (single-file CSP: `connect-src 'none'`).
 
 ## Download and run
 
-Download [`release/password-vault.html`](release/password-vault.html) (Raw / Download button) and open it in Chrome.
+Download [`password-vault.html`](https://github.com/miekuskamil/vault/raw/main/password-vault.html) and open it in Chrome.
 Nothing to install; everything runs and stays on the device. After a code change, run `npm run build:single`
-and copy `dist-single/index.html` over `release/password-vault.html`.
+and copy `dist-single/index.html` over `password-vault.html`.
 
 ## Build and test
 
