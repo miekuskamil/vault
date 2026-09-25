@@ -1,0 +1,378 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Vault Project Overview</title>
+<meta name="description" content="Offline encrypted password vault: stack, architecture, build phases and test strategy.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;900&family=Cinzel+Decorative:wght@700&family=Inter:ital,wght@0,300;0,400;0,500;0,600;1,400&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+:root{
+  --bg:#0C0F16;--bg-panel:#13182A;--bg-card:#1A2035;
+  --border:#252E45;--border-sub:#1E2840;
+  --text:#E4D9C8;--muted:#7A8BA0;--dim:#394558;
+  --ember:#FF5A32;--ember-dim:rgba(255,90,50,.12);
+  --gold:#C8A050;--gold-dim:rgba(200,160,80,.10);
+  --teal:#3DD6B8;--teal-dim:rgba(61,214,184,.10);
+  --violet:#8B78E6;--violet-dim:rgba(139,120,230,.12);
+  --rose:#E0607A;--rose-dim:rgba(224,96,122,.12);
+  --sky:#4DA6FF;--sky-dim:rgba(77,166,255,.12);
+  --serif:'Cinzel',Georgia,serif;--deco:'Cinzel Decorative','Cinzel',Georgia,serif;
+  --sans:'Inter',system-ui,-apple-system,'Segoe UI',sans-serif;
+  --mono:'JetBrains Mono',ui-monospace,'SFMono-Regular',Menlo,Consolas,monospace;
+  color-scheme:dark;
+}
+@media (prefers-color-scheme:light){
+  :root:not([data-theme="dark"]){
+    --bg:#F0EBE0;--bg-panel:#E8E0CC;--bg-card:#DED6C0;
+    --border:#C0B090;--border-sub:#CFC3A6;--text:#1A1510;--muted:#5A4E3A;--dim:#8A7E6A;
+    --ember:#C83A14;--ember-dim:rgba(200,58,20,.09);
+    --gold:#886010;--gold-dim:rgba(136,96,16,.09);
+    --teal:#1A7A68;--teal-dim:rgba(26,122,104,.08);
+    --violet:#5040B0;--violet-dim:rgba(80,64,176,.09);
+    --rose:#A03050;--rose-dim:rgba(160,48,80,.09);
+    --sky:#2060C0;--sky-dim:rgba(32,96,192,.09);
+    color-scheme:light;
+  }
+}
+:root[data-theme="light"]{
+  --bg:#F0EBE0;--bg-panel:#E8E0CC;--bg-card:#DED6C0;
+  --border:#C0B090;--border-sub:#CFC3A6;--text:#1A1510;--muted:#5A4E3A;--dim:#8A7E6A;
+  --ember:#C83A14;--ember-dim:rgba(200,58,20,.09);
+  --gold:#886010;--gold-dim:rgba(136,96,16,.09);
+  --teal:#1A7A68;--teal-dim:rgba(26,122,104,.08);
+  --violet:#5040B0;--violet-dim:rgba(80,64,176,.09);
+  --rose:#A03050;--rose-dim:rgba(160,48,80,.09);
+  --sky:#2060C0;--sky-dim:rgba(32,96,192,.09);
+  color-scheme:light;
+}
+:root[data-theme="dark"]{color-scheme:dark}
+*{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-text-size-adjust:100%}
+body{background:var(--bg);color:var(--text);font:400 15px/1.6 var(--sans);overflow-x:hidden}
+a{color:var(--ember)}
+code{font-family:var(--mono);font-size:.85em;background:var(--bg-card);border:1px solid var(--border-sub);border-radius:4px;padding:0 .3em}
+.wrap{max-width:920px;margin:0 auto;padding:0 16px}
+section{padding:56px 0 8px}
+.eyebrow{font:600 .72rem/1 var(--serif);letter-spacing:.22em;text-transform:uppercase;color:var(--gold);margin-bottom:10px}
+h2{font:600 1.5rem/1.25 var(--serif);margin-bottom:8px}
+.lede{color:var(--muted);max-width:640px;margin-bottom:24px}
+
+/* hero */
+.hero{position:relative;overflow:hidden;border-bottom:1px solid var(--border);padding:88px 0 64px}
+.hero::before{content:"";position:absolute;inset:-40% -20% auto auto;width:720px;height:720px;
+  background:radial-gradient(circle,var(--ember-dim) 0%,transparent 62%);pointer-events:none}
+.hero::after{content:"";position:absolute;inset:0;pointer-events:none;opacity:.35;
+  background:repeating-linear-gradient(0deg,transparent 0 3px,var(--border-sub) 3px 4px);mask-image:linear-gradient(transparent,#000 40%,transparent)}
+.hero .wrap{position:relative;z-index:1}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:28px}
+.chip{font:500 .65rem/1 var(--mono);letter-spacing:.08em;text-transform:uppercase;padding:6px 10px;border-radius:999px;border:1px solid var(--border);color:var(--muted);background:var(--bg-panel)}
+.chip.e{color:var(--ember);background:var(--ember-dim);border-color:transparent}
+.chip.t{color:var(--teal);background:var(--teal-dim);border-color:transparent}
+.chip.g{color:var(--gold);background:var(--gold-dim);border-color:transparent}
+h1{font:700 clamp(2.4rem,8vw,4.4rem)/1.05 var(--deco);letter-spacing:.01em;margin-bottom:18px}
+h1 em{font-style:normal;color:var(--ember)}
+.tagline{font-weight:300;font-size:1.12rem;color:var(--muted);max-width:580px}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:1px;background:var(--border);border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-top:40px}
+.stat{background:var(--bg-panel);padding:16px 18px}
+.stat b{display:block;font:500 1.5rem/1.1 var(--mono);color:var(--text)}
+.stat span{font-size:.8rem;color:var(--muted)}
+
+/* stack */
+.stack{display:grid;grid-template-columns:repeat(auto-fill,minmax(185px,1fr));gap:1px;background:var(--border);border:1px solid var(--border);border-radius:10px;overflow:hidden}
+.cell{background:var(--bg-panel);padding:16px 18px}
+.cell .l{font:400 .65rem/1 var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--dim);margin-bottom:8px}
+.cell .n{font-weight:500;margin-bottom:4px}
+.cell .d{font-size:.84rem;color:var(--muted);line-height:1.5}
+
+/* architecture */
+figure{background:var(--bg-panel);border:1px solid var(--border);border-radius:10px;padding:18px}
+.svgbox{overflow-x:auto;-webkit-overflow-scrolling:touch}
+.svgbox svg{display:block;width:100%;min-width:640px;height:auto}
+figcaption{font-size:.82rem;color:var(--muted);margin-top:12px;border-top:1px solid var(--border-sub);padding-top:12px}
+svg .box{fill:var(--bg-card);stroke:var(--border)}
+svg .box.k{stroke:var(--ember);fill:var(--ember-dim)}
+svg .box.s{stroke:var(--teal)}
+svg .box.b{stroke:var(--sky);stroke-dasharray:4 3;fill:var(--sky-dim)}
+svg .band{fill:none;stroke:var(--border-sub);stroke-dasharray:2 4}
+svg .t1{fill:var(--text);font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:500}
+svg .t2{fill:var(--muted);font-family:'JetBrains Mono',ui-monospace,monospace;font-size:8px}
+svg .ey{fill:var(--gold);font-family:'Cinzel',Georgia,serif;font-size:8px;letter-spacing:2px}
+svg .ln{stroke:var(--muted);stroke-width:1.2;fill:none}
+svg .ln.e{stroke:var(--ember)}
+svg .ln.t{stroke:var(--teal)}
+svg .ln.s{stroke:var(--sky);stroke-dasharray:4 3}
+svg .mk{fill:var(--muted)} svg .mk.e{fill:var(--ember)} svg .mk.t{fill:var(--teal)} svg .mk.s{fill:var(--sky)}
+
+/* phases */
+.phases{display:grid;gap:10px}
+.pc{--c:var(--ember);--cd:var(--ember-dim);background:var(--bg-panel);border:1px solid var(--border);border-radius:10px;transition:border-color .2s}
+.pc:hover,.pc[open]{border-color:color-mix(in srgb,var(--c) 40%,transparent)}
+.p1{--c:var(--ember);--cd:var(--ember-dim)}.p2{--c:var(--gold);--cd:var(--gold-dim)}.p3{--c:var(--teal);--cd:var(--teal-dim)}
+.p4{--c:var(--violet);--cd:var(--violet-dim)}.p5{--c:var(--rose);--cd:var(--rose-dim)}.p6{--c:var(--sky);--cd:var(--sky-dim)}
+.ph{display:flex;align-items:center;gap:16px;padding:16px 18px;cursor:pointer;list-style:none}
+.ph::-webkit-details-marker{display:none}
+.ph:focus-visible{outline:2px solid var(--c);outline-offset:2px;border-radius:10px}
+.pn{font:500 1.9rem/1 var(--mono);color:var(--c);opacity:.45;min-width:2.2ch}
+.pt{flex:1;min-width:0}
+.pt b{display:block;font:600 1.02rem/1.3 var(--serif)}
+.pt span{font-size:.84rem;color:var(--muted)}
+.tag{font:500 .62rem/1 var(--mono);letter-spacing:.08em;text-transform:uppercase;padding:6px 9px;border-radius:999px;background:var(--cd);color:var(--c);white-space:nowrap}
+.chev{color:var(--dim);transition:transform .2s;font-family:var(--mono)}
+.pc[open] .chev{transform:rotate(90deg);color:var(--c)}
+.steps{list-style:none;padding:4px 18px 18px 18px;display:grid;gap:12px;border-top:1px solid var(--border-sub);margin:0 18px;padding-left:0;padding-right:0;padding-top:16px}
+.steps li{display:grid;grid-template-columns:2.6em 1fr;gap:6px}
+.steps .sn{font:400 .75rem/1.6 var(--mono);color:var(--dim)}
+.steps b{font-weight:600}
+.steps p{color:var(--muted);font-size:.88rem}
+
+/* tests */
+.tests{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.tc{background:var(--bg-panel);border:1px solid var(--border);border-radius:10px;padding:18px 20px}
+.tc h3{font:600 .72rem/1 var(--serif);letter-spacing:.2em;text-transform:uppercase;color:var(--teal);margin-bottom:6px}
+.tc .meta{font:400 .7rem/1.4 var(--mono);color:var(--dim);margin-bottom:12px}
+.tc ul{list-style:none;display:grid;gap:7px}
+.tc li{position:relative;padding-left:1.3em;font-size:.88rem;color:var(--muted)}
+.tc li::before{content:"→";position:absolute;left:0;color:var(--ember);font-family:var(--mono)}
+.tc li b{color:var(--text);font-weight:500}
+
+/* files */
+.files{border:1px solid var(--border);border-radius:10px;overflow:hidden}
+.files div{display:grid;grid-template-columns:minmax(0,210px) 1fr;gap:16px;padding:10px 18px;border-top:1px solid var(--border-sub);background:var(--bg-panel);font-size:.88rem}
+.files div:first-child{border-top:0}
+.files code{background:none;border:0;padding:0;color:var(--gold);word-break:break-all}
+.files span{color:var(--muted)}
+
+footer{margin-top:64px;padding:28px 0 40px;border-top:1px solid var(--border);text-align:center;font:400 .72rem/1.6 var(--mono);color:var(--dim)}
+
+@media (max-width:640px){
+  .hero{padding:56px 0 40px}
+  section{padding-top:44px}
+  .tests{grid-template-columns:1fr}
+  .ph{gap:12px;padding:14px}
+  .tag{display:none}
+  .files div{grid-template-columns:1fr;gap:2px}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<header class="hero">
+  <div class="wrap">
+    <div class="chips">
+      <span class="chip e">AES-256-GCM</span>
+      <span class="chip g">PBKDF2 · 600k</span>
+      <span class="chip t">Offline PWA</span>
+      <span class="chip">React 19 · TypeScript</span>
+      <span class="chip">Vite 8 · single-file build</span>
+    </div>
+    <h1>The <em>Vault</em></h1>
+    <p class="tagline">Logins, bank details, cards, IDs and notes, with photos, locked behind one master password. Everything is encrypted on the phone and never leaves it: no account, no cloud, no network.</p>
+    <div class="stats">
+      <div class="stat"><b>0</b><span>network requests (CSP <code>connect-src 'none'</code>)</span></div>
+      <div class="stat"><b>600,000</b><span>PBKDF2-SHA256 rounds per unlock</span></div>
+      <div class="stat"><b>2</b><span>builds: one HTML file, or installable PWA</span></div>
+      <div class="stat"><b>30 days</b><span>in the trash before anything is really gone</span></div>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+  <section>
+    <p class="eyebrow">The stack</p>
+    <h2>Browser-native, nothing rolled by hand</h2>
+    <p class="lede">All cryptography is WebCrypto. The only runtime libraries are React and an icon set; everything else, including the Excel and OLE parsers, is local TypeScript.</p>
+    <div class="stack">
+      <div class="cell"><div class="l">UI</div><div class="n">React 19</div><div class="d">Shell with tabs, search, bulk select; screens for items, import, health, settings.</div></div>
+      <div class="cell"><div class="l">Language</div><div class="n">TypeScript</div><div class="d">Strict types across core and UI, checked with <code>npm run typecheck</code>.</div></div>
+      <div class="cell"><div class="l">Crypto</div><div class="n">WebCrypto</div><div class="d">PBKDF2 → KEK wraps a random 256-bit DEK; AES-GCM seals data, files and snapshots.</div></div>
+      <div class="cell"><div class="l">Storage</div><div class="n">IndexedDB</div><div class="d">Sealed envelope, attachments, snapshots; <code>localStorage</code> fallback, persistence requested.</div></div>
+      <div class="cell"><div class="l">Unlock</div><div class="n">Passkey PRF</div><div class="d">Fingerprint unlock wraps the same DEK with a WebAuthn PRF-derived key (installed app only).</div></div>
+      <div class="cell"><div class="l">Build</div><div class="n">Vite 8</div><div class="d"><code>vite-plugin-singlefile</code> for <code>password-vault.html</code>; a second mode emits the PWA.</div></div>
+      <div class="cell"><div class="l">Offline</div><div class="n">Service worker</div><div class="d">Generated from <code>sw.template.js</code>, precaches the hashed assets.</div></div>
+      <div class="cell"><div class="l">Tests</div><div class="n">Vitest · Playwright</div><div class="d">Unit tests on jsdom + fake IndexedDB; real-browser flows at phone size (412×915).</div></div>
+    </div>
+  </section>
+
+  <section>
+    <p class="eyebrow">Architecture</p>
+    <h2>From master password to screen</h2>
+    <p class="lede">The master password never touches storage. It derives a key-encryption key that unwraps the data key; only then is the vault decrypted into memory.</p>
+    <figure>
+      <div class="svgbox">
+        <svg viewBox="0 0 760 330" role="img" aria-labelledby="va-t">
+          <title id="va-t">Vault architecture: unlock pipeline, supporting subsystems, and on-device storage</title>
+          <defs>
+            <marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="mk" d="M0 0L10 5L0 10z"/></marker>
+            <marker id="ahe" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="mk e" d="M0 0L10 5L0 10z"/></marker>
+            <marker id="aht" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="mk t" d="M0 0L10 5L0 10z"/></marker>
+            <marker id="ahs" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="mk s" d="M0 0L10 5L0 10z"/></marker>
+          </defs>
+
+          <text class="ey" x="16" y="22">UNLOCK PIPELINE</text>
+          <rect class="box" x="16" y="34" width="108" height="52" rx="6"/>
+          <text class="t1" x="70" y="57" text-anchor="middle">MASTER PWD</text><text class="t2" x="70" y="72" text-anchor="middle">in memory only</text>
+          <rect class="box k" x="140" y="34" width="108" height="52" rx="6"/>
+          <text class="t1" x="194" y="57" text-anchor="middle">PBKDF2</text><text class="t2" x="194" y="72" text-anchor="middle">600k → KEK</text>
+          <rect class="box k" x="264" y="34" width="108" height="52" rx="6"/>
+          <text class="t1" x="318" y="57" text-anchor="middle">UNWRAP DEK</text><text class="t2" x="318" y="72" text-anchor="middle">AES-GCM · 256-bit</text>
+          <rect class="box k" x="388" y="34" width="108" height="52" rx="6"/>
+          <text class="t1" x="442" y="57" text-anchor="middle">DECRYPT</text><text class="t2" x="442" y="72" text-anchor="middle">vault JSON + files</text>
+          <rect class="box" x="512" y="34" width="108" height="52" rx="6"/>
+          <text class="t1" x="566" y="57" text-anchor="middle">SESSION</text><text class="t2" x="566" y="72" text-anchor="middle">model · auto-lock</text>
+          <rect class="box" x="636" y="34" width="108" height="52" rx="6"/>
+          <text class="t1" x="690" y="57" text-anchor="middle">REACT UI</text><text class="t2" x="690" y="72" text-anchor="middle">shell + screens</text>
+          <path class="ln e" d="M124 60H138" marker-end="url(#ahe)"/>
+          <path class="ln e" d="M248 60H262" marker-end="url(#ahe)"/>
+          <path class="ln e" d="M372 60H386" marker-end="url(#ahe)"/>
+          <path class="ln e" d="M496 60H510" marker-end="url(#ahe)"/>
+          <path class="ln" d="M620 60H634" marker-end="url(#ah)"/>
+
+          <text class="ey" x="16" y="136">SUBSYSTEMS</text>
+          <rect class="box s" x="16" y="148" width="180" height="52" rx="6"/>
+          <text class="t1" x="106" y="171" text-anchor="middle">BIOMETRIC PRF</text><text class="t2" x="106" y="186" text-anchor="middle">passkey wraps same DEK</text>
+          <rect class="box s" x="206" y="148" width="170" height="52" rx="6"/>
+          <text class="t1" x="291" y="171" text-anchor="middle">BACKUP / RESTORE</text><text class="t2" x="291" y="186" text-anchor="middle">.vault file · CSV export</text>
+          <rect class="box s" x="416" y="148" width="170" height="52" rx="6"/>
+          <text class="t1" x="501" y="171" text-anchor="middle">IMPORTERS</text><text class="t2" x="501" y="186" text-anchor="middle">CSV · XLSX · protected XLSX</text>
+          <rect class="box s" x="596" y="148" width="148" height="52" rx="6"/>
+          <text class="t1" x="670" y="171" text-anchor="middle">TOOLS</text><text class="t2" x="670" y="186" text-anchor="middle">2FA · health · generator</text>
+          <path class="ln t" d="M106 148L300 88" marker-end="url(#aht)"/>
+          <path class="ln t" d="M291 148L205 88" marker-end="url(#aht)"/>
+          <path class="ln t" d="M501 148L560 88" marker-end="url(#aht)"/>
+          <path class="ln t" d="M670 148L686 88" marker-end="url(#aht)"/>
+
+          <text class="ey" x="16" y="246">ON-DEVICE STORAGE</text>
+          <rect class="box b" x="16" y="258" width="236" height="52" rx="6"/>
+          <text class="t1" x="134" y="281" text-anchor="middle">INDEXEDDB</text><text class="t2" x="134" y="296" text-anchor="middle">sealed envelope + attachments</text>
+          <rect class="box b" x="262" y="258" width="236" height="52" rx="6"/>
+          <text class="t1" x="380" y="281" text-anchor="middle">SNAPSHOTS · TRASH</text><text class="t2" x="380" y="296" text-anchor="middle">version history, 30-day trash</text>
+          <rect class="box b" x="508" y="258" width="236" height="52" rx="6"/>
+          <text class="t1" x="626" y="281" text-anchor="middle">SERVICE WORKER</text><text class="t2" x="626" y="296" text-anchor="middle">precached app shell (PWA)</text>
+          <path class="ln s" d="M396 258V90" marker-end="url(#ahs)"/>
+        </svg>
+      </div>
+      <figcaption>Ember arrows are the unlock path, all inside WebCrypto. Teal arrows show subsystems feeding the pipeline: biometric unlock unwraps the same data key, a backup is re-opened with its own password, and importers and tools write through the session. The dashed sky line is the sealed ciphertext read from IndexedDB; plaintext is never written back.</figcaption>
+    </figure>
+  </section>
+
+  <section>
+    <p class="eyebrow">How it was built</p>
+    <h2>Six phases</h2>
+    <p class="lede">The order the pieces went in, from the crypto core outward. Open a phase to see its steps.</p>
+    <div class="phases">
+      <details class="pc p1" name="phase" open>
+        <summary class="ph"><span class="pn">01</span><span class="pt"><b>Crypto core</b><span>Key wrapping the way mainstream managers do it</span></span><span class="tag">crypto.ts</span><span class="chev" aria-hidden="true">›</span></summary>
+        <ol class="steps">
+          <li><span class="sn">1.1</span><div><b>KEK from password</b><p>PBKDF2-SHA256 at 600,000 rounds with a random salt; 100,000 is the floor for old files.</p></div></li>
+          <li><span class="sn">1.2</span><div><b>Random data key</b><p>A 256-bit DEK is wrapped by the KEK, so a password change re-wraps one key instead of re-encrypting everything.</p></div></li>
+          <li><span class="sn">1.3</span><div><b>Seal everything</b><p>AES-GCM with fresh IVs over the vault JSON, each attachment and each snapshot.</p></div></li>
+          <li><span class="sn">1.4</span><div><b>v2 envelope</b><p><code>format: "pwvault", v: 2</code> with KDF params, wrapped keys, revision counter and timestamp.</p></div></li>
+          <li><span class="sn">1.5</span><div><b>v1 read path</b><p>The original single-file format still opens read-only and is migrated forward.</p></div></li>
+        </ol>
+      </details>
+      <details class="pc p2" name="phase">
+        <summary class="ph"><span class="pn">02</span><span class="pt"><b>Storage &amp; session</b><span>Safe saves, locking and history</span></span><span class="tag">session.ts</span><span class="chev" aria-hidden="true">›</span></summary>
+        <ol class="steps">
+          <li><span class="sn">2.1</span><div><b>IndexedDB store</b><p>Envelope, attachments and snapshots, with a <code>localStorage</code> fallback and a persistent-storage request.</p></div></li>
+          <li><span class="sn">2.2</span><div><b>Verified writes</b><p>Every save is read back and checked; a failed check raises instead of silently losing data.</p></div></li>
+          <li><span class="sn">2.3</span><div><b>Multi-tab safety</b><p>A revision counter detects a vault changed in another tab and refuses to overwrite it.</p></div></li>
+          <li><span class="sn">2.4</span><div><b>Auto-lock</b><p>Locks after inactivity or when the app is hidden; copied secrets are cleared from the clipboard.</p></div></li>
+          <li><span class="sn">2.5</span><div><b>Snapshots &amp; trash</b><p>Version-history snapshots, earlier passwords kept per item, 30-day trash and undo.</p></div></li>
+        </ol>
+      </details>
+      <details class="pc p3" name="phase">
+        <summary class="ph"><span class="pn">03</span><span class="pt"><b>App shell &amp; screens</b><span>Phone-first React UI</span></span><span class="tag">ui/</span><span class="chev" aria-hidden="true">›</span></summary>
+        <ol class="steps">
+          <li><span class="sn">3.1</span><div><b>Shell</b><p>Category tabs, search, favorites and multi-select for bulk move or delete.</p></div></li>
+          <li><span class="sn">3.2</span><div><b>Item types</b><p>Logins, bank, cards, IDs and notes, plus free-form extra fields such as PIN or sort code.</p></div></li>
+          <li><span class="sn">3.3</span><div><b>Attachments</b><p>Photos and PDFs shrunk on-device, then sealed like every other byte.</p></div></li>
+          <li><span class="sn">3.4</span><div><b>Tools</b><p>Built-in TOTP codes, a password health check (weak, reused, old) and a character or word generator.</p></div></li>
+          <li><span class="sn">3.5</span><div><b>Theme</b><p>Dark and light themes sized and tested at 412×915.</p></div></li>
+        </ol>
+      </details>
+      <details class="pc p4" name="phase">
+        <summary class="ph"><span class="pn">04</span><span class="pt"><b>Importers</b><span>Bring the old spreadsheet in, pictures and all</span></span><span class="tag">importers/</span><span class="chev" aria-hidden="true">›</span></summary>
+        <ol class="steps">
+          <li><span class="sn">4.1</span><div><b>CSV &amp; manager exports</b><p>Chrome, Bitwarden, 1Password and Firefox layouts mapped onto vault fields.</p></div></li>
+          <li><span class="sn">4.2</span><div><b>XLSX parser</b><p>Zip and sheet XML read locally; every tab becomes a category and pictures stay with their row.</p></div></li>
+          <li><span class="sn">4.3</span><div><b>Password-protected Excel</b><p>Compound-file (CFB) reader plus Office Agile and Standard decryption in <code>officecrypto.ts</code>.</p></div></li>
+          <li><span class="sn">4.4</span><div><b>Hostile-file limits</b><p>64 MB per part, 256 MB total, 4 M cells and 300 pictures, so zip bombs and lying sizes fail cleanly.</p></div></li>
+        </ol>
+      </details>
+      <details class="pc p5" name="phase">
+        <summary class="ph"><span class="pn">05</span><span class="pt"><b>Two builds, one source</b><span>Single file and installable PWA</span></span><span class="tag">vite</span><span class="chev" aria-hidden="true">›</span></summary>
+        <ol class="steps">
+          <li><span class="sn">5.1</span><div><b>Single-file mode</b><p><code>password-vault.html</code>: everything inlined, open it straight from disk.</p></div></li>
+          <li><span class="sn">5.2</span><div><b>PWA mode</b><p>Hashed assets, manifest, icons and a generated service worker for offline launch.</p></div></li>
+          <li><span class="sn">5.3</span><div><b>Fingerprint unlock</b><p>WebAuthn PRF passkey, available once installed on an https origin.</p></div></li>
+          <li><span class="sn">5.4</span><div><b>Locked-down headers</b><p><code>_headers</code> sets a strict CSP, no framing, no referrer, and HSTS.</p></div></li>
+          <li><span class="sn">5.5</span><div><b>Release script</b><p><code>npm run release</code> builds both and copies them to the repo root for static hosting.</p></div></li>
+        </ol>
+      </details>
+      <details class="pc p6" name="phase">
+        <summary class="ph"><span class="pn">06</span><span class="pt"><b>Hardening &amp; verification</b><span>Regression suite and screenshot tour</span></span><span class="tag">tests/</span><span class="chev" aria-hidden="true">›</span></summary>
+        <ol class="steps">
+          <li><span class="sn">6.1</span><div><b>Unit coverage</b><p>Crypto, session, model, importers, Office decryption, strength, TOTP and health.</p></div></li>
+          <li><span class="sn">6.2</span><div><b>Browser flows</b><p>Playwright at phone size: setup, edit, import, backup and restore, PWA install.</p></div></li>
+          <li><span class="sn">6.3</span><div><b>v1 → v2 migration</b><p>The original app is a fixture; its vault must open and move across intact.</p></div></li>
+          <li><span class="sn">6.4</span><div><b>Hostile fixtures</b><p>Generated bombs, huge rows and web-linked images guard the import limits.</p></div></li>
+          <li><span class="sn">6.5</span><div><b>Screenshot tour</b><p><code>SHOTS=1</code> run produces the README images from the real app.</p></div></li>
+        </ol>
+      </details>
+    </div>
+  </section>
+
+  <section>
+    <p class="eyebrow">Test strategy</p>
+    <h2>What keeps it honest</h2>
+    <p class="lede">Run from <code>app/</code>: <code>npm test</code>, <code>npm run typecheck</code>, <code>npx playwright test</code>.</p>
+    <div class="tests">
+      <div class="tc"><h3>Unit</h3><p class="meta">vitest · jsdom · fake-indexeddb</p><ul>
+        <li><b>crypto</b>: wrap, unwrap, wrong password, iteration floor</li>
+        <li><b>session</b>: saves, conflicts, auto-lock, snapshots</li>
+        <li><b>officecrypto</b>: Agile and Standard encrypted workbooks</li>
+        <li><b>importers, model, strength, TOTP, health</b></li>
+      </ul></div>
+      <div class="tc"><h3>Hostile inputs</h3><p class="meta">python fixture generators</p><ul>
+        <li><b>Zip bombs</b>, including ones that lie about their size</li>
+        <li><b>Huge rows</b> and pictures anchored under headings</li>
+        <li><b>Web-linked images</b> that must never be fetched</li>
+        <li>Workbooks encrypted by Excel and by LibreOffice</li>
+      </ul></div>
+      <div class="tc"><h3>Integration</h3><p class="meta">playwright · chromium · 412×915</p><ul>
+        <li><b>Flows</b>: setup, add, edit, search, bulk actions, trash</li>
+        <li><b>Import</b>: real spreadsheets end to end</li>
+        <li><b>Migration</b>: v1 single-file vault to v2</li>
+        <li><b>PWA</b> install, offline launch, regressions</li>
+      </ul></div>
+      <div class="tc"><h3>Manual</h3><p class="meta">on a real Android phone</p><ul>
+        <li>Install from Chrome and turn on fingerprint unlock</li>
+        <li>Back up, then restore into the installed app</li>
+        <li>Airplane mode: open, unlock, edit, lock</li>
+        <li>Switch apps and confirm it locks itself</li>
+      </ul></div>
+    </div>
+  </section>
+
+  <section>
+    <p class="eyebrow">In the repo</p>
+    <h2>Where things live</h2>
+    <div class="files">
+      <div><code>password-vault.html</code><span>The whole app in one file. Download and open.</span></div>
+      <div><code>index.html · assets/ · sw.js</code><span>The installable build; host this folder.</span></div>
+      <div><code>_headers</code><span>Strict CSP and security headers for Netlify.</span></div>
+      <div><code>app/src/core/</code><span>Crypto, session, storage, importers, TOTP, health.</span></div>
+      <div><code>app/src/ui/</code><span>React shell and screens.</span></div>
+      <div><code>app/tests/</code><span>Unit, end-to-end and fixture generators.</span></div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">vault · 6 phases · React 19 + TypeScript + Vite 8 · WebCrypto · zero network</div>
+</footer>
+</body>
+</html>

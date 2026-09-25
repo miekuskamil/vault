@@ -76,6 +76,8 @@ or update the app. It's gone if you **clear browsing data**, so back up now and 
 ## 🛠️ For developers
 
 How it's built, testing, and releasing are in **[DOCS.md](DOCS.md)**.
+For a one-page tour (stack, architecture, build phases, tests), open
+**[`docs/overview.html`](docs/overview.html)**.
 
 ---
 
@@ -90,3 +92,4 @@ How it's built, testing, and releasing are in **[DOCS.md](DOCS.md)**.
 | `_headers` | Strict security headers for Netlify. |
 | `app/` | Source code (React + TypeScript) and tests. |
 | `DOCS.md` | Developer notes. |
+| `docs/overview.html` | One-page project overview. |
