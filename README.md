@@ -3,6 +3,12 @@
 Offline, encrypted password vault. One HTML file for the phone, or an installable web app.
 Nothing is ever sent over the network (single-file CSP: `connect-src 'none'`).
 
+## Download and run
+
+Download [`release/password-vault.html`](release/password-vault.html) (Raw / Download button) and open it in Chrome.
+Nothing to install; everything runs and stays on the device. After a code change, run `npm run build:single`
+and copy `dist-single/index.html` over `release/password-vault.html`.
+
 ## Build and test
 
 ```sh
